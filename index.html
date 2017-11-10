@@ -7,39 +7,31 @@
   <meta name="author" content="Kishan Emens">
   <link rel="stylesheet" type="text/css" media="all" href="css/bulma.css">
   <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" media="all" href="css/odometer-theme-default.css">
+  <script src="js/odometer.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
-  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </head>
 
 <body>
-  <section class="hero is-dark is-bold is-fullheight">
-    <div class="hero-head">
-      <div class="container">
-        <h1 class="title">
-          Full Height title
-        </h1>
-        <h2 class="subtitle">
-          Full Height subtitle
-        </h2>
-      </div>
-    </div>
+  <section class="hero is-bold is-fullheight">
     <div class="hero-body">
-      <div id="chartContainer" style="height: 370px; width:100%;"></div>
+      <div class="container">
+        <h1 class="title" id="odometer">0</h1>
+      </div>
     </div>
   </section>
 <script type="text/javascript">
-var urls = ['phi-line/oolong', 'phi-line/RepoTracker'];
+var urls = ['phi-line/RepoTracker'];
 
-function getData(url, commits=false, callback) {
+function getData(url, stats=false, callback) {
   var requri   = 'https://api.github.com/repos/' + url +
-                  (commits ? '/commits' : '');
+                  (stats ? '/stats/contributors' : '');
 
   requestJSON(requri, function(json) {
     if(json.message == 'Not Found' || url == '') {
-      // window.alert('No Repo Found');
-    }
-    else {
-
+      console.log.alert('No Repo Found');
     }
     callback(json);
   });
@@ -55,10 +47,10 @@ function requestJSON(url, callback) {
 }
 
 var Repo = class {
-  constructor(url, data=null, commits=null) {
+  constructor(url, data=null, stats=null, commits=null) {
     this.url = url
-    this.data = null
-    this.commits = null
+    this.data = data
+    this.stats = stats
   }
 };
 
@@ -68,8 +60,8 @@ getRepo = function(url) {
       getData(url, null, function (json) {
         repo.data = json
         getData(url, true, function (json) {
-          repo.commits = json
-          if (repo.data && repo.commits)
+          repo.stats = json
+          if (repo.data && repo.stats)
             resolve(repo)
           else {
             reject(repo)
@@ -79,30 +71,52 @@ getRepo = function(url) {
   })
 }
 
-len = function(json) {
-  return Object.keys(json).length;
+getLines = function(stats) {
+  var totalAdditions = 0;
+  var totalDeletions = 0;
+
+  for(author in stats) {
+    for (day in stats[author].weeks) {
+      totalAdditions += stats[author].weeks[day].a;
+      totalDeletions += stats[author].weeks[day].d;
+    }
+  }
+  return totalAdditions - totalDeletions;
 }
 
-var totalCommits = 0;
 
-var repoClasses = []
-urls.forEach(url => {
-  getRepo(url).then(repo => {
-      repoClasses.push(repo);
-      totalCommits += len(repo.commits);
-  })
-});
+var totalLines = 0;
+var repoArr = []
+
+let requests = urls.map((url) => {
+    return getRepo(url).then(repo => {
+        repoArr.push(repo);
+        totalLines += getLines(repo.stats);
+    })
+})
+
+Promise.all(requests).then(() => $('#odometer').html(totalLines))
+
+// urls.forEach(url => {
+//   getRepo(url).then(repo => {
+//       repoArr.push(repo);
+//       totalLines += getLines(repo.stats);
+//   })
+// });
+
 
 window.setInterval(function(){
-  repoClasses.forEach(repo => {
-    getRepo(repo.url).then(newRepo => {
-      if (newRepo.data && newRepo.commits)
-        if (!_.isEqual(repo, newRepo))
-          totalCommits += len(newRepo.commits) - len(repo.commits);
+    totalLines = 0;
+    let requests = repoArr.map((repo, i, repoArr) => {
+      return getRepo(repo.url).then(newRepo => {
+          totalLines += getLines(newRepo.stats);
+          if (! _.isEqual(repoArr[i], newRepo))
+            repoArr[i] = newRepo;
+      })
     })
-  });
-  console.log(totalCommits);
-}, 1000);
+
+    Promise.all(requests).then(() => $('#odometer').html(totalLines))
+}, 5000);
 </script>
 </body>
 </html>
