@@ -15,141 +15,45 @@
 </head>
 
 <body>
-  <section class="hero is-bold is-fullheight">
+  <section class="hero is-dark is-bold is-fullheight">
     <div class="hero-body">
-      <div class="container">
-        <h1 class="title odometer has-text-success" id="lines">0</h1>
-        <h2 class="subtitle is-size-3">Lines coded</h2>
-      </div>
-      <div class="container">
-        <h1 class="title odometer has-text-primary" id="commits">0</h1>
-        <h2 class="subtitle is-size-3">Total Commits</h2>
+      <div class="container" id="stats">
+        <div class="columns">
+          <div class="column is-6">
+            <h1 class="title odometer has-text-success" id="lines">0</h1>
+            <h2 class="subtitle is-size-3">Lines coded</h2>
+          </div>
+
+          <div class="column is-6">
+            <div class="column is-12">
+              <h1 class="title odometer has-text-primary" id="commits">0</h1>
+              <h2 class="subtitle is-size-3">Total Commits</h2>
+            </div>
+
+            <div class="column is-12" id="latest-commit">
+              <div class="box">
+                <article class="media">
+                  <div class="media-left">
+                    <figure class="image is-64x64">
+                      <img id="commit-image" src="https://bulma.io/images/placeholders/128x128.png">
+                    </figure>
+                  </div>
+                  <div class="media-content">
+                    <div class="content">
+                      <strong id="commit-name"></strong> <small id="commit-username"></small> <small id="commit-date"></small>
+                      <br>
+                      <p id="commit-message"></p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>
-<script type="text/javascript">
-var urls = ['phi-line/RepoTracker'];
-
-function getData(url, stats=false, callback) {
-  var requri   = 'https://api.github.com/repos/' + url +
-                  (stats ? '/stats/contributors' : '');
-
-  requestJSON(requri, function(json) {
-    if(json.message == 'Not Found' || url == '') {
-      console.log.alert('No Repo Found');
-    }
-    callback(json);
-  });
-}
-
-function requestJSON(url, callback) {
-  $.ajax({
-    url: url,
-    complete: function(xhr) {
-      callback.call(null, xhr.responseJSON);
-    }
-  });
-}
-
-var Repo = class {
-  constructor(url, data=null, stats=null, commits=null) {
-    this.url = url
-    this.data = data
-    this.stats = stats
-  }
-};
-
-getRepo = function(url) {
-    return new Promise(function(resolve, reject) {
-      var repo = new Repo(url);
-      getData(url, null, function (json) {
-        repo.data = json
-        getData(url, true, function (json) {
-          repo.stats = json
-          if (repo.data && repo.stats)
-            resolve(repo)
-          else {
-            reject(repo)
-          }
-        })
-      })
-  })
-}
-
-getLines = function(stats) {
-  var totalAdditions = 0;
-  var totalDeletions = 0;
-
-  for(author in stats) {
-    for (day in stats[author].weeks) {
-      totalAdditions += stats[author].weeks[day].a;
-      totalDeletions += stats[author].weeks[day].d;
-    }
-  }
-  return totalAdditions - totalDeletions;
-}
-
-getCommits = function(stats) {
-  var totalCommits = 0;
-
-  for(author in stats) {
-    for (day in stats[author].weeks) {
-      totalCommits += stats[author].weeks[day].c;
-    }
-  }
-  return totalCommits;
-}
-
-lines = new Odometer({
-  el: document.querySelector('#lines'),
-  value: 0,
-  format: ',ddd',
-  duration: 2500,
-  theme: 'default'
-});
-
-let selector =
-commits = new Odometer({
-  el: document.querySelector('#commits'),
-  value: 0,
-  format: ',ddd',
-  duration: 2500,
-  theme: 'default'
-});
-
-var totalLines = 0;
-var totalCommits = 0;
-var repoArr = []
-
-let requests = urls.map((url) => {
-    return getRepo(url).then(repo => {
-        repoArr.push(repo);
-        totalLines += getLines(repo.stats);
-        totalCommits += getCommits(repo.stats);
-    })
-})
-Promise.all(requests).then(() => {
-  lines.update(totalLines)
-  commits.update(totalCommits)
-})
-
-window.setInterval(function(){
-    totalLines = 0;
-    totalCommits = 0;
-    let requests = repoArr.map((repo, i, repoArr) => {
-      return getRepo(repo.url).then(newRepo => {
-          totalLines += getLines(newRepo.stats);
-          totalCommits += getCommits(repo.stats);
-          if (! _.isEqual(repoArr[i], newRepo))
-            repoArr[i] = newRepo;
-      })
-    })
-    Promise.all(requests).then(() => {
-      lines.update(totalLines)
-      commits.update(totalCommits)
-    })
-}, 2500);
-
-</script>
+<script type="text/javascript" src="js/tracker.js"></script>
 </body>
 </html>
