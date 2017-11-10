@@ -18,7 +18,12 @@
   <section class="hero is-bold is-fullheight">
     <div class="hero-body">
       <div class="container">
-        <h1 class="title" id="odometer">0</h1>
+        <h1 class="title odometer has-text-success" id="lines">0</h1>
+        <h2 class="subtitle is-size-3">Lines coded</h2>
+      </div>
+      <div class="container">
+        <h1 class="title odometer has-text-primary" id="commits">0</h1>
+        <h2 class="subtitle is-size-3">Total Commits</h2>
       </div>
     </div>
   </section>
@@ -84,39 +89,67 @@ getLines = function(stats) {
   return totalAdditions - totalDeletions;
 }
 
+getCommits = function(stats) {
+  var totalCommits = 0;
+
+  for(author in stats) {
+    for (day in stats[author].weeks) {
+      totalCommits += stats[author].weeks[day].c;
+    }
+  }
+  return totalCommits;
+}
+
+lines = new Odometer({
+  el: document.querySelector('#lines'),
+  value: 0,
+  format: ',ddd',
+  duration: 2500,
+  theme: 'default'
+});
+
+let selector =
+commits = new Odometer({
+  el: document.querySelector('#commits'),
+  value: 0,
+  format: ',ddd',
+  duration: 2500,
+  theme: 'default'
+});
 
 var totalLines = 0;
+var totalCommits = 0;
 var repoArr = []
 
 let requests = urls.map((url) => {
     return getRepo(url).then(repo => {
         repoArr.push(repo);
         totalLines += getLines(repo.stats);
+        totalCommits += getCommits(repo.stats);
     })
 })
-
-Promise.all(requests).then(() => $('#odometer').html(totalLines))
-
-// urls.forEach(url => {
-//   getRepo(url).then(repo => {
-//       repoArr.push(repo);
-//       totalLines += getLines(repo.stats);
-//   })
-// });
-
+Promise.all(requests).then(() => {
+  lines.update(totalLines)
+  commits.update(totalCommits)
+})
 
 window.setInterval(function(){
     totalLines = 0;
+    totalCommits = 0;
     let requests = repoArr.map((repo, i, repoArr) => {
       return getRepo(repo.url).then(newRepo => {
           totalLines += getLines(newRepo.stats);
+          totalCommits += getCommits(repo.stats);
           if (! _.isEqual(repoArr[i], newRepo))
             repoArr[i] = newRepo;
       })
     })
-
-    Promise.all(requests).then(() => $('#odometer').html(totalLines))
+    Promise.all(requests).then(() => {
+      lines.update(totalLines)
+      commits.update(totalCommits)
+    })
 }, 5000);
+
 </script>
 </body>
 </html>
