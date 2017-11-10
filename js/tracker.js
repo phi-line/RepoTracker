@@ -1,4 +1,4 @@
-var urls = ['phi-line/RepoTracker'];
+var urls = ['phi-line/oolong', 'phi-line/RepoTracker'];
 
 function getStats(url, stats=false, callback) {
   let requri = 'https://api.github.com/repos/' + url +
@@ -117,6 +117,19 @@ commits = new Odometer({
   theme: 'default'
 });
 
+var dataPoints = [];
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+  backgroundColor: null,
+	theme: "dark1",
+	data: [{
+		type: "column",
+		yValueFormatString: "#,### Lines",
+		dataPoints: dataPoints
+	}]
+});
+chart.render();
+
 var totalLines = 0;
 var totalCommits = 0;
 var latestCommit;
@@ -128,6 +141,16 @@ let requests = urls.map((url) => {
         totalLines += getNumLines(repo.stats);
         totalCommits += getNumCommits(repo.stats);
         repoLatest = getLatestCommit(repo);
+
+        dataPoints.push({
+          y: getNumLines(repo.stats),
+          label: String(repo.data.name)
+        });
+
+        if (dataPoints.length > 5) {
+          dataPoints.shift();
+        }
+
         if (!latestCommit || timeGreater(repoLatest, latestCommit))
           latestCommit = repoLatest;
     })
@@ -136,16 +159,27 @@ Promise.all(requests).then(() => {
   lines.update(totalLines)
   commits.update(totalCommits)
   updateCommitCard(latestCommit)
+  chart.render();
 })
 
 window.setInterval(function(){
     totalLines = 0;
     totalCommits = 0;
+    dataPoints = [];
     let requests = repoArr.map((repo, i, repoArr) => {
       return getRepo(repo.url).then(newRepo => {
           repoArr[i] = newRepo;
           totalLines += getNumLines(newRepo.stats);
           totalCommits += getNumCommits(newRepo.stats);
+
+          dataPoints.push({
+            x: newRepo.data.name,
+            y: getNumLines(newRepo.stats)
+          });
+
+          if (dataPoints.length > 5) {
+            dataPoints.shift();
+          }
 
           repoLatest = getLatestCommit(newRepo);
           if (!latestCommit || timeGreater(repoLatest, latestCommit))
@@ -156,5 +190,8 @@ window.setInterval(function(){
       lines.update(totalLines)
       commits.update(totalCommits)
       updateCommitCard(latestCommit);
+      chart.render();
     })
+
+    chart.render();
 }, 10000);

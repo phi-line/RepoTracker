@@ -5,9 +5,9 @@
   <meta http-equiv="Content-Type" content="text/html">
   <title>Github Repository Tracker</title>
   <meta name="author" content="Kishan Emens">
-  <link rel="stylesheet" type="text/css" media="all" href="css/bulma.css">
-  <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-  <script type="text/javascript" src="js/jquery.canvasjs.min.js"></script>
+  <link rel="stylesheet" type="text/css" media="all" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css">
+  <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+  <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
 
   <link rel="stylesheet" type="text/css" media="all" href="css/odometer-theme-default.css">
   <script src="js/odometer.min.js"></script>
@@ -17,13 +17,21 @@
   <section class="hero is-dark is-bold is-fullheight">
     <div class="hero-body">
       <div class="container" id="stats">
-        <div class="columns">
-          <div class="column is-6">
-            <h1 class="title odometer has-text-success" id="lines">0</h1>
-            <h2 class="subtitle is-size-3">Lines coded</h2>
+        <div class="columns is-gapless">
+          <div class="column is-7">
+            <div class="column is-12">
+              <h1 class="title odometer has-text-success" id="lines">0</h1>
+              <h2 class="subtitle is-size-3">Lines coded</h2>
+            </div>
+            <hr>
+            <div class="column is-12">
+              <div id="chartContainer" style="height: 250px; width: 100%;"></div>
+            </div>
+
+
           </div>
 
-          <div class="column is-6">
+          <div class="column is-5">
             <div class="column is-12">
               <h1 class="title odometer has-text-primary" id="commits">0</h1>
               <h2 class="subtitle is-size-3">Total Commits</h2>
@@ -31,7 +39,7 @@
             <hr>
             <div class="column is-12" id="latest-commit">
               <h2 class="subtitle is-size-5">Latest commit:</h2>
-              <div class="notification is-light">
+              <div class="notification is-light is-outlined">
                 <article class="media">
                   <div class="media-left">
                     <figure class="image is-64x64">
