@@ -90,7 +90,7 @@ getLatestCommit = function(repo) {
 }
 
 timeGreater = function (c1, c2) {
-  return c1.commit.author.time > c2.commit.author.time;
+  return c1.commit.author.date > c2.commit.author.date;
 }
 
 updateCommitCard = function (commit) {
@@ -194,4 +194,4 @@ window.setInterval(function(){
     })
 
     chart.render();
-}, 10000);
+}, 1000);
