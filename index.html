@@ -7,11 +7,10 @@
   <meta name="author" content="Kishan Emens">
   <link rel="stylesheet" type="text/css" media="all" href="css/bulma.css">
   <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="js/jquery.canvasjs.min.js"></script>
 
   <link rel="stylesheet" type="text/css" media="all" href="css/odometer-theme-default.css">
   <script src="js/odometer.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
 </head>
 
 <body>
@@ -29,9 +28,10 @@
               <h1 class="title odometer has-text-primary" id="commits">0</h1>
               <h2 class="subtitle is-size-3">Total Commits</h2>
             </div>
-
+            <hr>
             <div class="column is-12" id="latest-commit">
-              <div class="box">
+              <h2 class="subtitle is-size-5">Latest commit:</h2>
+              <div class="notification is-light">
                 <article class="media">
                   <div class="media-left">
                     <figure class="image is-64x64">

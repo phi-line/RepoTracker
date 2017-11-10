@@ -143,14 +143,13 @@ window.setInterval(function(){
     totalCommits = 0;
     let requests = repoArr.map((repo, i, repoArr) => {
       return getRepo(repo.url).then(newRepo => {
+          repoArr[i] = newRepo;
           totalLines += getNumLines(newRepo.stats);
-          totalCommits += getNumCommits(repo.stats);
-          repoLatest = getLatestCommit(repo);
+          totalCommits += getNumCommits(newRepo.stats);
+
+          repoLatest = getLatestCommit(newRepo);
           if (!latestCommit || timeGreater(repoLatest, latestCommit))
             latestCommit = repoLatest;
-
-          if (! _.isEqual(repoArr[i], newRepo))
-            repoArr[i] = newRepo;
       })
     })
     Promise.all(requests).then(() => {
