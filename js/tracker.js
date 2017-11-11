@@ -1,4 +1,21 @@
-var urls = ['phi-line/oolong', 'phi-line/RepoTracker'];
+var urls = ['apg400/word_extractor_ML',
+            'phi-line/RepoTracker',
+            'koji1234/OwlHackathon2018',
+            'weisscoding/FoothillSchedulizer',
+            'edbasurto/Foothill-Hackathon-2017'];
+
+function auth(url, callback) {
+  let requri = 'https://api.github.com/';
+
+  requestJSON(requri, function(json) {
+    fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: "Basic cGhpLWxpbmU6ZWQ2NGQ4NjVmYmM5YTBmZGVkOTAyYzU5MmEyMDZmMzdlZWFmMWZmNQ=="
+      }
+    })
+    callback(json);
+  });
+}
 
 function getStats(url, stats=false, callback) {
   let requri = 'https://api.github.com/repos/' + url +
@@ -45,11 +62,11 @@ getRepo = function(url) {
     return new Promise(function(resolve, reject) {
       var repo = new Repo(url);
       getStats(url, null, function (json) {
-        repo.data = json
+        if (json) repo.data = json
         getStats(url, true, function (json) {
-          repo.stats = json
+          if (json) repo.stats = json
           getCommits(url, function (json) {
-            repo.commits = json
+            if (json) repo.commits = json
             if (repo.data && repo.stats && repo.commits)
               resolve(repo)
             else {
@@ -194,4 +211,4 @@ window.setInterval(function(){
     })
 
     chart.render();
-}, 1000);
+}, 10000);
