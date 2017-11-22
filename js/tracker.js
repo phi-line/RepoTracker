@@ -4,7 +4,7 @@ var urls = ['apg400/word_extractor_ML',
             'weisscoding/FoothillSchedulizer',
             'edbasurto/Foothill-Hackathon-2017'];
 
-function auth(url, callback) {
+function auth(callback) {
   let requri = 'https://api.github.com/';
 
   requestJSON(requri, function(json) {
@@ -16,6 +16,9 @@ function auth(url, callback) {
     callback(json);
   });
 }
+auth(() => {
+  console.log('app authorized');
+})
 
 function getStats(url, stats=false, callback) {
   let requri = 'https://api.github.com/repos/' + url +
